@@ -12,6 +12,7 @@ from datetime import datetime
 from share_btn import community_icon_html, loading_icon_html, share_js
 
 # SDXL code: https://github.com/huggingface/diffusers/pull/3859
+#PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:256 SHARE=true ENABLE_REFINER=false python app7.py
 
 model_dir = "/workspace/"
 access_token = os.getenv("ACCESS_TOKEN")
@@ -23,12 +24,12 @@ model_key_refiner = "stabilityai/stable-diffusion-xl-refiner-1.0"
 enable_refiner = os.getenv("ENABLE_REFINER", "true").lower() == "true"
 # Output images before the refiner and after the refiner
 output_images_before_refiner = True
-
 # Create public link
 share = os.getenv("SHARE", "false").lower() == "true"
 
 print("Loading model", model_key_base)
 pipe = DiffusionPipeline.from_pretrained(model_key_base, torch_dtype=torch.float16, use_auth_token=access_token)
+pipe.load_lora_weights("artificialguybr/LogoRedmond-LogoLoraForSDXL")
 
 #pipe.enable_model_cpu_offload()
 pipe.to("cuda")
@@ -43,6 +44,8 @@ pipe.enable_xformers_memory_efficient_attention()
 if enable_refiner:
     print("Loading model", model_key_refiner)
     pipe_refiner = DiffusionPipeline.from_pretrained(model_key_refiner, torch_dtype=torch.float16, use_auth_token=access_token)
+    pipe_refiner.load_lora_weights("artificialguybr/LogoRedmond-LogoLoraForSDXL")
+
     #pipe_refiner.enable_model_cpu_offload()
     pipe_refiner.to("cuda")
 
@@ -306,23 +309,6 @@ with block:
                   Stable Diffusion XL 1.0
                 </h1>
               </div>
-              <p style="margin-bottom: 10px; font-size: 94%; line-height: 23px;">
-			    Brought you by SECourses : <a style="text-decoration: underline;" href="https://www.youtube.com/SECourses">https://www.youtube.com/SECourses</a>
-				<br/>
-				Please support me on Patreon : <a style="text-decoration: underline;" href="https://www.patreon.com/SECourses">https://www.patreon.com/SECourses</a>
-				<br/>
-				Patreon exclusive posts index : <a style="text-decoration: underline;" href="https://github.com/FurkanGozukara/Stable-Diffusion/blob/main/Patreon-Posts-Index.md">https://github.com/FurkanGozukara/Stable-Diffusion/blob/main/Patreon-Posts-Index.md</a>
-				<br/>
-                Stable Diffusion XL 1.0 is the latest text-to-image model from StabilityAI. 
-                <br/>
-                For faster generation and API access you can try
-                <a
-                  href="http://beta.dreamstudio.ai/"
-                  style="text-decoration: underline;"
-                  target="_blank"
-                  >DreamStudio Beta</a
-                >.</a>
-              </p>
             </div>
         """
     )
